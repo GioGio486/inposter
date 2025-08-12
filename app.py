@@ -1,14 +1,14 @@
 from flask import Flask, render_template, redirect, url_for, request, session, flash
-import random
 from questions import questions
 
 app = Flask(__name__)
-app.secret_key = "supersecretkey"  # Use env var in production
+app.secret_key = "supersecretkey"
 
 players = []
-current_question = None
-impostor_index = None
 answers = []
+
+# Fixed question for all players
+current_question = questions[0]  # always use the first question
 
 @app.route("/")
 def lobby():
@@ -29,12 +29,10 @@ def join():
 
 @app.route("/start")
 def start():
-    global current_question, impostor_index, answers
+    global answers
     if len(players) < 2:
         flash("At least 2 players needed to start.")
         return redirect(url_for("lobby"))
-    current_question = random.choice(questions)
-    impostor_index = random.randint(0, len(players) - 1)
     answers.clear()
     return redirect(url_for("game"))
 
@@ -44,9 +42,9 @@ def game():
     if not player_name or player_name not in players:
         flash("You must join the lobby first.")
         return redirect(url_for("lobby"))
-    player_index = players.index(player_name)
-    question_text = current_question["impostor"] if player_index == impostor_index else current_question["normal"]
+
     answered = any(a["name"] == player_name for a in answers)
+    question_text = current_question["normal"]  # all get same question now
     return render_template("game.html", name=player_name, question=question_text, answered=answered)
 
 @app.route("/answer", methods=["POST"])
@@ -78,15 +76,21 @@ def reveal():
     if len(answers) < len(players):
         flash("Waiting for all players to answer.")
         return redirect(url_for("game"))
-    return render_template("reveal.html", answers=answers, impostor=players[impostor_index])
+
+    return render_template(
+        "reveal.html",
+        question=current_question["normal"],
+        answers=answers
+    )
 
 @app.route("/reset")
 def reset():
-    global players, current_question, impostor_index, answers
+    global players, answers
     players.clear()
-    current_question = None
-    impostor_index = None
     answers.clear()
     session.clear()
     flash("Game reset.")
     return redirect(url_for("lobby"))
+
+if __name__ == "__main__":
+    app.run(host="0.0.0.0", port=5000, debug=True)

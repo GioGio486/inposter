@@ -2,18 +2,80 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
     <title>Game</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 600px;
+            margin: 30px auto;
+            padding: 0 15px;
+            background: #f5f5f5;
+        }
+        h1, h2 {
+            color: #333;
+        }
+        form {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+        form input[type="text"] {
+            padding: 12px;
+            font-size: 1.1em;
+            border-radius: 4px;
+            border: 1px solid #ccc;
+            width: 100%;
+            box-sizing: border-box;
+        }
+        button {
+            padding: 12px;
+            font-size: 1.1em;
+            background: #007bff;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            width: 100%;
+            box-sizing: border-box;
+        }
+        button:hover {
+            background: #0056b3;
+        }
+        .flash {
+            color: #cc0000;
+            font-weight: bold;
+            margin-bottom: 15px;
+        }
+        a {
+            display: inline-block;
+            margin-top: 20px;
+            color: #007bff;
+            text-decoration: none;
+        }
+        a:hover {
+            text-decoration: underline;
+        }
+        .answered {
+            font-style: italic;
+            color: #666;
+            margin-top: 20px;
+        }
+        p {
+            word-wrap: break-word;
+        }
+    </style>
 </head>
 <body>
     <h1>Hello, {{ name }}!</h1>
 
     {% with messages = get_flashed_messages() %}
       {% if messages %}
-        <ul style="color: red;">
+        <div class="flash">
           {% for msg in messages %}
-            <li>{{ msg }}</li>
+            <div>{{ msg }}</div>
           {% endfor %}
-        </ul>
+        </div>
       {% endif %}
     {% endwith %}
 
@@ -21,10 +83,10 @@
     <p>{{ question }}</p>
 
     {% if answered %}
-        <p><em>You already answered. Waiting for others...</em></p>
+        <p class="answered">You already answered. Waiting for others...</p>
     {% else %}
         <form action="{{ url_for('answer') }}" method="POST">
-            <input type="text" name="answer" placeholder="Your answer" required />
+            <input type="text" name="answer" placeholder="Your answer" required autocomplete="off" />
             <button type="submit">Submit Answer</button>
         </form>
     {% endif %}
